@@ -19,31 +19,53 @@ class CartController extends Controller
         return redirect()->back()->with('status', 'Product Added to Cart Successfully.');
     }
 
-    public function increaseCartQuantity($rowId)
+    public function ajaxIncreaseCartQuantity($rowId)
     {
         $product = Cart::instance('cart')->get($rowId);
-        $qty = $product->qty + 1;
-        Cart::instance('cart')->update($rowId, $qty);
+        $newQty = $product->qty + 1;
+        Cart::instance('cart')->update($rowId, $newQty);
 
         return response()->json([
             'success' => true,
-            'subTotal' => Cart::instance('cart')->subtotal(),
-            'total' => Cart::instance('cart')->total(),
-            'tax' => Cart::instance('cart')->tax(),
+            'newQty' => $newQty,
+            'newSubtotal' => Cart::instance('cart')->get($rowId)->subtotal,
         ]);
     }
 
-    public function decreaseCartQuantity($rowId)
+    public function ajaxDecreaseCartQuantity($rowId)
     {
         $product = Cart::instance('cart')->get($rowId);
-        $qty = $product->qty > 1 ? $product->qty - 1 : 1; // Minimum 1
-        Cart::instance('cart')->update($rowId, $qty);
+        $newQty = max(1, $product->qty - 1); // Qty cannot be less than 1
+        Cart::instance('cart')->update($rowId, $newQty);
 
         return response()->json([
             'success' => true,
-            'subTotal' => Cart::instance('cart')->subtotal(),
-            'total' => Cart::instance('cart')->total(),
-            'tax' => Cart::instance('cart')->tax(),
+            'newQty' => $newQty,
+            'newSubtotal' => Cart::instance('cart')->get($rowId)->subtotal,
         ]);
+    }
+
+    public function removeItem(Request $request, $rowId)
+    {
+        try {
+            // Remove the item from the cart
+            Cart::instance('cart')->remove($rowId);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Item removed successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to remove the item',
+            ]);
+        }
+    }
+
+    public function empty_cart()
+    {
+        Cart::instance('cart')->destroy();
+        return redirect()->back();
     }
 }

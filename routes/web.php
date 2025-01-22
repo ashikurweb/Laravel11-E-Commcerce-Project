@@ -17,8 +17,11 @@ Route::get('/shop/{product_slug}', [ShopController::class, 'product_details'])->
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'addToCart'])->name('cart.addToCart');
-Route::put('/cart/increase/{rowId}', [CartController::class, 'increaseCartQuantity'])->name('cart.increase-cart-quantity');
-Route::put('/cart/decrease/{rowId}', [CartController::class, 'decreaseCartQuantity'])->name('cart.decrease-cart-quantity');
+Route::post('/cart/increase/{rowId}', [CartController::class, 'ajaxIncreaseCartQuantity']);
+Route::post('/cart/decrease/{rowId}', [CartController::class, 'ajaxDecreaseCartQuantity']);
+Route::post('/cart/remove/{rowId}', [CartController::class, 'removeItem'])->name('cart.remove');
+Route::delete('/cart/clear', [CartController::class, 'empty_cart'])->name('cart.empty');
+
 
 
 Route::middleware(['auth'])->group(function () {
